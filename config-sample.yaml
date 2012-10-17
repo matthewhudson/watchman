@@ -1,0 +1,18 @@
+---
+  interval: 300000
+  user-agent: 'WatchmanBot'
+  status-codes: [200, 202, 300, 301, 302, 304]
+  from: 'example@example.com'
+  cc: ['example@example.com']
+  
+  ses:
+    access: 'XXXXXXXXXXXXXXXXXXXX'
+    secret: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+  
+  websites:
+    google:
+      host: 'www.google.com'
+      contact: 'example@example.com'
+    microsoft:
+      host: 'www.microsoft.com'
+      contact: 'example@example.com'
