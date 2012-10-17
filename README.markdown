@@ -2,9 +2,15 @@
 
 Watchman monitors websites to ensure they return an expected Status Code. If not, an email is sent to the respective admin.
 
+## Usage
+
+Edit config-sample.yaml, and then rename to config.yaml. Then run: 
+
+	node index.js
+
 ## Configuration
 
-Edit config.yaml to you suit your needs.
+Edit config-sample.yaml to you suit your needs. 
 
 ### Basic
 
@@ -28,9 +34,13 @@ A list of acceptable HTTP Status Codes. If the request does not return a status 
 
 A list of emails to be CC'ed if ANY of the sites in the list of monitored websites are down.
 
-#### SES
+#### Amazon SES
 
 Watchman relies on Amazon SES to send email alerts.
+
+##### Access/Secret Keys
+
+Without these, Watchman can't see emails.
 
 ##### From
 
