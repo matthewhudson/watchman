@@ -7,12 +7,15 @@ var http = require('http'),
 	isAcceptableStatus = false,
 	isAlertActive = false;
 
+// Handle uncaughtException
+process.on('uncaughtException', function(err){
+    console.log('Error: %s', err.message);
+	console.log('Exiting...');
+    process.exit(1);
+});
+
 // Open the config file and establish user settings.
 var config = yaml.eval(fs.readFileSync('config.yaml', 'utf8').toString());
-
-if (!config) {
-	console.log("config.yaml is invalid, please check.")
-}
 
 // Initialize HTTP GET request settings.
 var requestOptions = {
@@ -23,13 +26,13 @@ var requestOptions = {
 };
 
 // Configure the Mail
-var mailTransport = nodemailer.createTransport("SES", {
+var mailTransport = nodemailer.createTransport('SES', {
 	AWSAccessKeyID: config.ses.access,
 	AWSSecretKey: config.ses.secret
 });
 
 var checkStatus = function (hostname, contact, statusCode) {
-	console.log("CHECK " + hostname + " -> " + statusCode);
+	console.log('CHECK ' + hostname + ' -> ' + statusCode);
 
 	isAcceptableStatus = _.indexOf(config['status-codes'], statusCode) >= 0;
 	isAlertActive = _.indexOf(activeAlerts, hostname) >= 0;
@@ -38,14 +41,14 @@ var checkStatus = function (hostname, contact, statusCode) {
 	// 1. Status code is unacceptable (not in config[status-codes])
 	// 2. We haven't already notified them.
 	if (!isAcceptableStatus && !isAlertActive) {
-		console.log("ALERTING contact for " + hostname);
+		console.log('ALERTING contact for ' + hostname);
 
 		// Send the email:
 		mailTransport.sendMail({
 			from: config.from,
 			to: contact,
 			cc: config.cc,
-			subject: "DOWN alert: " + hostname + " EOM"
+			subject: 'DOWN alert: ' + hostname + ' EOM'
 		});
 
 		// Add hostname to activeAlerts[]
