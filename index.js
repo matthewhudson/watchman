@@ -34,9 +34,6 @@ var checkStatus = function (hostname, contact, statusCode) {
 	isAcceptableStatus = _.indexOf(config['status-codes'], statusCode) >= 0;
 	isAlertActive = _.indexOf(activeAlerts, hostname) >= 0;
 
-	console.log(isAcceptableStatus);
-	console.log(isAlertActive);
-
 	// Send admin email alert if:
 	// 1. Status code is unacceptable (not in config[status-codes])
 	// 2. We haven't already notified them.
