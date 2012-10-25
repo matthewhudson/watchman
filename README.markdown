@@ -8,6 +8,8 @@ Edit config-sample.yaml, and then rename to config.yaml. Then run:
 
 	node index.js
 
+Bam! As long as watchman is running in the background, it will monitor your websites and send alerts if anything is amiss.
+
 ## Configuration
 
 Edit config-sample.yaml to you suit your needs. 

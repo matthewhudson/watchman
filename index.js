@@ -3,9 +3,9 @@ var http = require('http'),
 	yaml = require('yaml')
 	_ = require('underscore'),
 	nodemailer = require('nodemailer'),
-	mailOptions = {},
-	statusCode = 0,
-	hostname = "";
+	activeAlerts = [],
+	isAcceptableStatus = false,
+	isAlertActive = false;
 
 // Open the config file and establish user settings.
 var config = yaml.eval(fs.readFileSync('config.yaml', 'utf8').toString());
@@ -28,29 +28,48 @@ var mailTransport = nodemailer.createTransport("SES", {
 	AWSSecretKey: config.ses.secret
 });
 
+var checkStatus = function (hostname, contact, statusCode) {
+	console.log("CHECK " + hostname + " -> " + statusCode);
+
+	isAcceptableStatus = _.indexOf(config['status-codes'], statusCode) >= 0;
+	isAlertActive = _.indexOf(activeAlerts, hostname) >= 0;
+
+	console.log(isAcceptableStatus);
+	console.log(isAlertActive);
+
+	// Send admin email alert if:
+	// 1. Status code is unacceptable (not in config[status-codes])
+	// 2. We haven't already notified them.
+	if (!isAcceptableStatus && !isAlertActive) {
+		console.log("ALERTING contact for " + hostname);
+
+		// Send the email:
+		mailTransport.sendMail({
+			from: config.from,
+			to: contact,
+			cc: config.cc,
+			subject: "DOWN alert: " + hostname + " EOM"
+		});
+
+		// Add hostname to activeAlerts[]
+		activeAlerts.push(hostname);
+
+		// If status check is healthy, remove the hostname from activeAlerts
+	} else if (isAcceptableStatus && isAlertActive) {
+		// Remove 'hostname' from activeAlerts[]
+		activeAlerts = _.without(activeAlerts, hostname);
+	}
+};
+
 // Begin polling websites.
 setInterval(function () {
 	_.each(config.websites, function (website) {
 		requestOptions.host = website.host;
 
 		http.get(requestOptions, function (response) {
-			statusCode = response.statusCode;
-			hostname = this._headers.host;
-			console.log(hostname + " -> " + statusCode);
-			
-			// Check if this an acceptable status code, if not alert admin.
-			if (_.indexOf(config['status-codes'], statusCode) === -1) {
-				mailOptions = {
-					from: config.from,
-					to: website.contact,
-					cc: config.cc.join(', '),
-					subject: "DOWN alert: " + hostname + " EOM"
-				}
-
-				mailTransport.sendMail(mailOptions);
-			}
+			checkStatus(website.host, website.contact, response.statusCode);
 		}).on('error', function (err) {
-			console.log("HTTP Request Error: " + err.message);
+			checkStatus(website.host, website.contact, false);
 		});
 	});
 }, config.interval);
