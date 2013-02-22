@@ -86,7 +86,7 @@ var checkStatus = function (hostname, contact, statusCode) {
   // 1. Status code is unacceptable (not in config[status-codes])
   // 2. We haven't already notified them.
   if (!isAcceptableStatus && !isAlertActive) {
-    console.log('ALERTING contact for ' + hostname);
+    console.warn('ALERTING contact for ' + hostname);
 
     // Send the email:
     mailTransport.sendMail({
